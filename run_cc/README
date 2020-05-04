@@ -1,0 +1,4 @@
+1. sudo chmod +x run_cc
+
+To run: 
+run_cc lustre_filename.lus
