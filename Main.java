@@ -32,8 +32,10 @@ import jkind.slicing.DependencySet;
 import jkind.slicing.Dependency;
 
 import java.util.HashSet;
+import java.util.ArrayList;
 
 import com.google.common.collect.Sets;
+import com.google.common.collect.Sets.SetView;
 
 import org.antlr.v4.runtime.ANTLRFileStream;
 import org.antlr.v4.runtime.CharStream;
@@ -95,6 +97,7 @@ public class Main{
         /* Start of algorithm from paper*/
         HashSet<ConnectedComponent> CC_set = new HashSet<>();
         boolean hasIntersection = false;
+        boolean mergeRest = false;
 
          // Y_i are the outputs of property P_i 
         HashSet<Dependency> Y_i = new HashSet<Dependency>();
@@ -108,18 +111,49 @@ public class Main{
                 ConnectedComponent C0 = new ConnectedComponent(P_i, Y_i);
                 CC_set.add(C0);
             }else{
-                hasIntersection = false;
+
+                hasIntersection = false; // Assume there are no matches and we need to create a new CC
+                mergeRest       = false; // Assume we don't need to merge CCs
+                ConnectedComponent C_common = new ConnectedComponent();    // Common CC in case we need to merge CCs
+                ArrayList<ConnectedComponent> C_stale_list = new ArrayList<>(); // List of stale CCs if we had to merge
+
                 for(ConnectedComponent C_j : CC_set){
+
+                    // If there is an intersection
                     if(Sets.intersection(C_j.outputs, Y_i).isEmpty() == false){
-                        C_j.properties.add(P_i);
-                        C_j.outputs.addAll(Y_i);                        
-                        hasIntersection = true;
-                        break;
+
+                        // Check if we need to merge with a previous overlap
+                        if(mergeRest == true){
+                            // Need to merge C_j with C_common
+                            Sets.union(C_j.properties, C_common.properties).copyInto(C_common.properties);
+                            Sets.union(C_j.outputs, C_common.outputs).copyInto(C_common.outputs);
+
+                            // Mark C_j for removal 
+                            C_stale_list.add(C_j);
+
+                        }else{
+
+                            // This is the first overlap seen
+                            C_j.properties.add(P_i);
+                            C_j.outputs.addAll(Y_i);                        
+
+                            // Any other intersections need to merged into the common CC
+                            mergeRest = true;
+                            C_common = C_j; 
+
+                            // We do not need to create a new CC
+                            hasIntersection = true;
+                        }
                     } 
                 }
                 if(hasIntersection == false){
                     ConnectedComponent C_new = new ConnectedComponent(P_i, Y_i);
                     CC_set.add(C_new);
+                }
+
+                // Remove any stale CCs
+                for(ConnectedComponent C_stale : C_stale_list){
+                    CC_set.remove(C_stale);
                 }
 
             }
