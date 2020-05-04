@@ -132,7 +132,6 @@ public class Main{
                             C_stale_list.add(C_j);
 
                         }else{
-
                             // This is the first overlap seen
                             C_j.properties.add(P_i);
                             C_j.outputs.addAll(Y_i);                        
