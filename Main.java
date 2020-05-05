@@ -59,15 +59,11 @@ public class Main{
 
             
             //System.out.println(spec.node.realizabilityInputs);
-            //System.out.println(spec.dependencyMap.get("FSM001v3"));
+            System.out.println(spec.dependencyMap.get("apfail"));
            
            
-            DependencySet d_shared = new DependencySet();
-            
-            ConnectedComponentSet CC_set = ComputeOutputConnectedComponents(spec); 
-
-           CC_set.print(); 
-
+            //ConnectedComponentSet CC_set = ComputeOutputConnectedComponents(spec); 
+            //CC_set.print(); 
 
         } catch (Throwable t){
             t.printStackTrace();
